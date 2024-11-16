@@ -1,15 +1,15 @@
-# Create Anki deck for standard chữ Hán Nôm to chữ Quốc Ngữ
+# Create Anki decks for learning the standard chữ Hán Nôm
 
 ## Description
-For this project, I aimed to create an Anki deck that helps learning standard Han Nom characters, organized by grade level. The source list was taken from https://www.hannom-rcv.org/.
+For this project, I aimed to create the Anki decks that helps learning the standard Han Nom characters. The deck are organized by grade levels ranging from grade 1 to grade 5, with THCS level be denoted as grade 6. The source list was taken from https://www.hannom-rcv.org/.
 
-The notebook generates six separate decks, which I later merged using Anki (by importing all six decks and then exporting them as one).
+The notebook generates 6+6 = 12 separated decks, which I later merged into 2 decks using Anki (by manually importing six decks and then exporting them as one).
 
-Link of the Anki deck: https://ankiweb.net/shared/info/1920684226
+Link of the Anki decks: [Hán Nôm -> chữ Quốc ngữ](https://ankiweb.net/shared/info/447461247) and [chữ Quốc ngữ -> Hán Nôm](https://ankiweb.net/shared/info/737152775)
 
 ## Installation Instructions
 
-You can follow the steps below to create the decks by yourself.
+You can follow the steps below to create the decks by yourself if you want.
 
 ### 1. **Clone the Repository**
 First, clone the repository to your local machine:
@@ -32,10 +32,10 @@ For Windows:
     .\myenv\Scripts\activate
 ```
 
-### 3. Install Dependencies from *requirements.txt*
+### 3. Install Dependencies from `requirements.txt`
 ```bash
     pip install -r requirements.txt
 ```
 ### 4. Run the Jupyter notebook.
 
-The result is in *result* folder
+The results will be in `results` folder
