@@ -5,7 +5,7 @@ For this project, I aimed to create an Anki deck that helps learning standard Ha
 
 The notebook generates six separate decks, which I later merged using Anki (by importing all six decks and then exporting them as one).
 
-
+Link of the Anki deck: https://ankiweb.net/shared/info/1920684226
 
 ## Installation Instructions
 
@@ -20,11 +20,14 @@ You can follow the steps below to create the decks by yourself.
 
 ### 2. **Set Up a Virtual Environment (Optional but Recommended)**
     For macOS/Linux:
+
     ```bash
     python3 -m venv myenv
     source myenv/bin/activate
     ```
+
     For Windows:
+
     ```bash
     python -m venv myenv
     .\myenv\Scripts\activate
