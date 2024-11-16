@@ -7,6 +7,10 @@ The notebook generates 6+6 = 12 separated decks, which I later merged into 2 dec
 
 Link of the Anki decks: [Hán Nôm -> chữ Quốc ngữ](https://ankiweb.net/shared/info/447461247) and [chữ Quốc ngữ -> Hán Nôm](https://ankiweb.net/shared/info/737152775)
 
+Notes:
+1. The Hán Nôm charactera in the brackets are the simplipied version (giản thể)
+2. The uppercase Quốc-ngữ letters are the standard Sino-Vietnamese (Hán Việt) sounds of Chinese characters; lowercase ones are the reading of the Nom character or the non-standard Sino-Vietnamese sounds of the Chinese character.
+
 ## Installation Instructions
 
 You can follow the steps below to create the decks by yourself if you want.
