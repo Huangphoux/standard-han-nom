@@ -5,11 +5,11 @@ For this project, I aimed to create the Anki decks that helps learning the stand
 
 The notebook generates 6+6 = 12 separated decks, which I later merged into 2 decks using Anki (by manually importing six decks and then exporting them as one).
 
-Link of the Anki decks: [Hán Nôm -> chữ Quốc ngữ](https://ankiweb.net/shared/info/447461247) and [chữ Quốc ngữ -> Hán Nôm](https://ankiweb.net/shared/info/737152775)
+Link of the Anki decks: [chữ Hán Nôm -> chữ Quốc ngữ](https://ankiweb.net/shared/info/447461247) and [chữ Quốc ngữ -> chữ Hán Nôm](https://ankiweb.net/shared/info/737152775)
 
 Notes:
-1. The Hán Nôm charactera in the brackets are the simplipied version (giản thể)
-2. The uppercase Quốc-ngữ letters are the standard Sino-Vietnamese (Hán Việt) sounds of Chinese characters; lowercase ones are the reading of the Nom character or the non-standard Sino-Vietnamese sounds of the Chinese character.
+1. The Han Nom characters in the brackets are the simplipied version (giản thể)
+2. The uppercase Quoc-ngu letters are the standard Sino-Vietnamese (Hán Việt) sounds of Chinese characters; lowercase ones are the reading of the Nom character or the non-standard Sino-Vietnamese sounds of the Chinese character.
 
 ## Installation Instructions
 
