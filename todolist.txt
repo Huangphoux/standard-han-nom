@@ -1,0 +1,3 @@
+- Lúc sắp xếp theo thứ tự thì quên các chữ có giản thể
+- Phân biệt bằng dấu ở cuối: Hoa thường thì ?, thường không thì !
+- Thay các chữ bằng chữ cải cách
