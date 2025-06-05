@@ -1,13 +1,21 @@
 # Create Anki decks for learning the standard chữ Hán Nôm
 
-## Description
-For this project, I aimed to create the Anki decks that helps learning the standard Han Nom characters. The deck are organized by grade levels ranging from grade 1 to grade 5, with THCS-and-beyond level be denoted as grade 6. The source list was taken from https://www.hannom-rcv.org/.
-
-The notebook generates 6+6 = 12 separated decks, which I later merged into 2 decks using Anki (by manually importing six decks and then exporting them as one).
+## Overview
+- Seeks to improve votaquangnhat's generated Anki decks.
+- The source list is from https://www.hannom-rcv.org/.
 
 Notes:
-1. The Han Nom characters in the brackets are the simplipied version (giản thể)
-2. The uppercase Quoc-ngu letters are the standard Sino-Vietnamese (Hán Việt) sounds of Chinese characters; lowercase ones are the reading of the Nom character or the non-standard Sino-Vietnamese sounds of the Chinese character.
+1. Characters in brackets are the simplified version (giản thể)
+2. Uppercase means standard Sino-Vietnamese (Hán Việt) readings of Chinese characters; lowercase means the reading of the Nom character or the non-standard Sino-Vietnamese sounds of the Chinese character.
 
-## Notable changes
-- 
+## Notable improvements
+- Cards' ordering based on order of apperance in the adjusted grading sheet ([Link to the Google Sheets]()).
+    - This is *huge*, because the old decks don't consider the order of apperance in the old grading list.
+- Nicer card formatting.
+    - Supported fonts embedding in the deck by default (Minh Nguyen for the front, Gothic Nguyen for the back).
+- Notes and grading infos in Anki notes and card's formatting.
+    - Grade 7: Characters in the level 2 list.
+    - Grade 8: Characters not included in either list.
+- Added Audio and Picture fields.
+    - Allow adding audios (i.e. generating using HyperTTS)
+    - Allow adding pictures to better illustrate the meaning of the character
