@@ -5,9 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
-    "blinker>=1.9.0",
     "brotli-asgi>=1.5.0",
-    "datastar-py>=0.7.0",
     "python-fasthtml>=0.12.35",
 ]
 

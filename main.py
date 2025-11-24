@@ -5,19 +5,42 @@ import csv
 
 
 app, rt = fast_app(
-    middleware=(Middleware(BrotliMiddleware),),
-    surreal=False,
-    hdrs=(
-        Style(
-            """
-                @font-face {
-                    font-family: gothic;
-                    src: url(_gothic.ttf);
-                }
-            """
+    middleware=(
+        Middleware(
+            BrotliMiddleware,
+            quality=6,  # compression speed vs compression density
+            mode="font",  # "generic", "text" or "font"
+            lgwin=22,  # Base 2 logarithm of the sliding window size. Range is 10 to 24.
+            lgblock=0,  # Base 2 logarithm of the maximum input block size. Range is 16 to 24.
+            minimum_size=400,  # Only compress responses that are bigger than this value in bytes.
+            gzip_fallback=False,
         ),
     ),
+    htmx=False,
+    surreal=False,
+    pico=False,
+    hdrs=(
+        Link(rel="icon", href="https://fav.farm/❤️"),  # favicon
+        # Vendored
+        Script(src="vendored/htmx.min_2.0.8.js"),
+        Script(src="vendored/_hyperscript.min_0.9.14.js"),
+        Link(rel="stylesheet", href="vendored/simple.css"),
+        # CSS
+        Style(
+            "@font-face { font-family: gothic; src: url(_minh.woff2) format('woff2');}"
+        ),
+        Style("@view-transition { navigation: auto; } * { font-family: gothic; }"),
+        Style(
+            ".hide-cols { "
+            + ", ".join([f"th:nth-child({i}), td:nth-child({i})" for i in (4, 5, 6)])
+            + " {display: none;} }",
+        ),
+        Style(" td { font-size: 2rem; } tr td:first-child { font-size: 10rem; } "),
+    ),
+    htmlkw={"lang": "vi"},
 )
+
+serve()
 
 
 with open("after-processing-list.csv", encoding="utf-8") as f:
@@ -27,50 +50,106 @@ with open("after-processing-list.csv", encoding="utf-8") as f:
     rows = list(reader)
 
 
-explanations = (
-    "Chỉ tìm được bằng chữ Quốc Ngữ, chưa tìm được bằng chữ Hán Nôm.",
-    "Không khoảng cách, tìm chính xác từ đó trong cột Reading. Có khoảng cách, tìm trong cột Examples.",
-    "Chữ hoa ở cột Âm đọc là âm Hán-Việt tiêu chuẩn của chữ Hán; chữ thường ở cột Âm đọc là cách đọc của chữ Nôm hoặc âm Hán-Việt không chuẩn của chữ Hán.",
-    "Chữ Hán Nôm Chuẩn được hiển thị trong cột Chữ Hán Nôm. Các chữ Hán Nôm được sắp xếp theo cách đọc. Trong trường hợp cách đọc giống nhau, cái nào có ít số nét hơn thì xếp trước.",
-    "[摱] nghĩa là một hoặc nhiều chữ Hán Nôm trong từ này được sử dụng để dịch âm. [嘆] nghĩa là từ này là thán từ; [俗] nghĩa là từ này là tiếng tục; [聲] nghĩa là từ này là từ tượng thanh; [𠸨] nghĩa là là từ láy.",
-    'Trong cột Ghi chú, chữ Hán Nôm có cách đọc khác nhau nhưng nghĩa hoàn toàn giống nhau (một số là cách đọc phương ngữ) được biểu thị với kí hiệu ⇔. Chữ dị thể thường gặp trong lịch sử của chữ Hán Nôm Chuẩn được biểu thị với kí hiệu [異]. Chữ Phiên âm được biểu thị với kí hiệu [翻]. Chữ Phiên âm là các chữ được chọn từ các chữ Hán Nôm Chuẩn dùng để phiên âm, chức năng của chữ Phiên âm tương tự như phiến giả danh (ca-ta-ca-na) tiếng Nhật, khi được sử dụng để phiên âm, chúng chỉ biểu âm và mất đi ý nghĩa. Thanh điệu của mỗi chữ Phiên âm là thanh ngang hoặc thanh sắc theo mặc định, và thanh điệu có thể thay đổi tự do theo tình hình thực tế. Để biết chi tiết về chữ Phiên âm, vui lòng tham khảo Phụ Lục. Số thập lục phân đằng sau "U+" cho biết Mã Thống nhất của chữ Hán Nôm Chuẩn này.',
+how_to_search = (
+    "hướng dẫn sử dụng: tìm chữ cho từng từ.",
+    'hướng-dẫn sử-dụng: tìm cụm "hướng dẫn" và "sử dụng".',
+    "向引使用: tìm từng chữ.",
+)
+
+symbols = (
+    "Chữ hoa: âm Hán-Việt tiêu chuẩn.",
+    "Chữ thường: cách đọc chữ Nôm, âm Hán-Việt không chuẩn.",
+    "Xếp các chữ theo cách đọc, sau đó ưu tiên ít nét nhất.",
+    "[摱] mượn để ghi âm.",
+    "[嘆] thán từ.",
+    "[俗] từ tục.",
+    "[聲] từ tượng thanh.",
+    "[𠸨] từ láy.",
+    "⇔: chữ đọc khác nhưng nghĩa giống (một số là cách đọc phương ngữ).",
+    "[異] dị thể trong lịch sử.",
+    "[翻] chữ phiên âm, dùng để phiên âm, giống Ca-ta-ca-na của tiếng Nhật.",
+    "Khi dùng để phiên âm, chúng giữ âm và mất nghĩa. Thanh ngang hoặc sắc.",
 )
 
 
 @rt
 async def index(search: Optional[str] = None):
-    search_term = search.lower() if search else ""
+    search_term = search.lower().strip() if search else ""
 
     result = []
 
-    if " " not in search_term:
-        result = [row for row in rows if search_term == str(row["Reading"]).lower()]
+    space_dash = " " in search_term and "-" in search_term
+    space_only = " " in search_term and "-" not in search_term
+    nospace_dash = " " not in search_term and "-" in search_term
+    nospace_only = " " not in search_term and "-" not in search_term
 
-    if " " in search_term:
-        result = [row for row in rows if search_term in str(row["Examples"]).lower()]
+    if space_dash:  # hướng dẫn sử dụng
+        for term in search_term.split(" "):
+            for row in rows:
+                if term.replace("-", " ") in str(row["Examples"]).lower():
+                    result.append(row)
+                    break
+
+    if space_only:  # hướng-dẫn sử-dụng
+        for term in search_term.split(" "):
+            result.extend(
+                row
+                for row in rows
+                if term == str(row["Reading"]).lower() and row not in result
+            )
+
+    if nospace_dash:
+        for row in rows:
+            if search_term.replace("-", " ") in str(row["Examples"]).lower():
+                result.append(row)
+                break
+
+    if nospace_only:
+        for term in list(search_term):
+            for row in rows:
+                if (
+                    term in str(row["Character"])
+                    or search_term == str(row["Reading"]).lower()
+                ):
+                    result.append(row)
+                    break
 
     return (
         Titled(
-            "Tra cứu chữ Hán Nôm chuẩn",
+            "Tìm chữ Hán Nôm",
             Body(hx_boost="true")(
                 Details(role="button")(
-                    Summary("Giải thích cách sử dụng"),
-                    *[P(text) for text in explanations],
+                    Summary("Hướng dẫn sử dụng"),
+                    H2("Cách sử dụng thanh tìm kiếm"),
+                    Ul(*[Li(text) for text in how_to_search]),
+                    H2("Ý nghĩa các kí hiệu"),
+                    Ul(*[Li(text) for text in symbols]),
                 ),
                 Form(role="search", action=index, method="get")(
                     Fieldset(role="group")(
+                        Label(_for="search")("Tìm chữ Hán Nôm"),
                         Input(
-                            value=search,
+                            id="search",
+                            value=search.strip() if search else "",
                             type="search",
                             name="search",
+                            maxlength="140",
                             placeholder="Gõ chữ Quốc Ngữ vào đây",
-                            autofocus=True,  # the string must not be empty, or set it to Python's True
+                            autofocus=True,
+                            required=True,
                             onfocus="var temp_value=this.value; this.value=''; this.value=temp_value",
+                            size="50",
                         ),
                         Input(type="submit", value="Tìm"),
                     ),
                 ),
-                Table(
+                Button(
+                    "Hiện Ghi chú, Mã Unicode, và Lớp (cần JavaScript)",
+                    _="on click toggle .hide-cols on <table/>",
+                    type="button",
+                ),
+                P("Cách tìm: "),
+                Table(_class="hide-cols")(
                     Thead(
                         Tr(
                             *(
@@ -86,17 +165,7 @@ async def index(search: Optional[str] = None):
                             ),
                         )
                     ),
-                    Tbody(
-                        Style(
-                            """
-                                tr { font-family: gothic; }
-                                td { font-size: 2rem; }
-                                tr td:first-child { font-size: 5rem; }
-                            """
-                        )
-                    )(
-                        id="search",
-                    )(
+                    Tbody()(
                         *[
                             Tr(
                                 *[Td(entry[header]) for header in headers],
@@ -106,8 +175,50 @@ async def index(search: Optional[str] = None):
                     ),
                 ),
             ),
+            Footer(
+                P(
+                    "Tất cả tài nguyên liên quan đến chữ Hán Nôm Chuẩn (",
+                    A(
+                        "bảng chữ Hán Nôm Chuẩn",
+                        href="https://www.hannom-rcv.org/standard-nom/Lookup-CHNC.html?uiLang=vi",
+                    ),
+                    ", ",
+                    A(
+                        "phông chữ Minh Nguyên",
+                        href="https://github.com/TKYKmori/Minh-Nguyen",
+                    ),
+                    ") đều được cung cấp bởi ",
+                    A(
+                        "Hội Nghiên cứu và Ứng dụng Hán Nôm",
+                        href="https://www.hannom-rcv.org/",
+                    ),
+                    ".",
+                ),
+                P(
+                    "Trang web được làm bằng ",
+                    (A("Python", href="https://www.python.org/")),
+                    ", ",
+                    (A("FastHTML", href="https://fastht.ml/")),
+                    ", ",
+                    A("htmx", href="https://htmx.org"),
+                    ", ",
+                    A("hyperscript", href="https://hyperscript.org"),
+                    ", ",
+                    A("Simple.css", href="https://simplecss.org"),
+                    " và ❤️ của ",
+                    A("Huangphoux", href="https://github.com/Huangphoux"),
+                    ".",
+                ),
+                P(
+                    "Mã nguồn (200 dòng) của trang này nằm ở ",
+                    (
+                        A(
+                            "đây",
+                            href="https://github.com/Huangphoux/standard-han-nom/blob/main/main.py",
+                        )
+                    ),
+                    " nè nha. ❤️",
+                ),
+            ),
         ),
     )
-
-
-serve()
