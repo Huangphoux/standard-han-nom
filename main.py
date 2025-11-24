@@ -2,6 +2,7 @@ from fasthtml.common import *
 from brotli_asgi import BrotliMiddleware
 
 import csv
+import re
 
 
 app, rt = fast_app(
@@ -52,9 +53,8 @@ with open("after-processing-list.csv", encoding="utf-8") as f:
 
 how_to_search = (
     "hướng dẫn sử dụng: tìm chữ cho từng từ.",
-    'hướng-dẫn sử-dụng: tìm cụm "hướng dẫn" và "sử dụng".',
-    "向引使用: tìm từng chữ.",
-    "hướng-dẫn: tìm cụm từ.",
+    "向: tìm chữ.",
+    "hướng: tìm từ.",
 )
 
 symbols = (
@@ -83,53 +83,20 @@ def home(search: Optional[str] = None):
     search_term = search.lower().strip() if search else ""
 
     result: list[dict] = []
-    mode: str = ""
 
-    space_dash = " " in search_term and "-" in search_term
-    space_only = " " in search_term and "-" not in search_term
-    nospace_dash = " " not in search_term and "-" in search_term
-    nospace_only = " " not in search_term and "-" not in search_term
-
-    if space_dash:  # hướng-dẫn sử-dụng; hướng-dẫn sử
-        mode = "tìm từng cụm được nối bằng kí tự gạch ngang (-)"
-
-        for term in search_term.split(" "):
-            term = term.replace("-", " ")
-
-            for row in rows:
-                if term == str(row["Reading"]).lower():
-                    result.append(row)
-                elif term in str(row["Examples"]):
-                    result.append(row)
-                    break
-
-    if space_only:  # hướng dẫn sử dụng
-        mode = "tìm chữ cho từng từ"
-
+    if " " in search_term:  # hướng dẫn sử dụng
         for term in search_term.split(" "):
             for row in rows:
                 if term == str(row["Reading"]).lower():
                     result.append(row)
 
-    if nospace_dash:  # hướng-dẫn
-        mode = "tìm cụm từ"
-
+    else:  # 向, người
         for row in rows:
-            if search_term.replace("-", " ") in str(row["Examples"]).lower():
+            if (
+                search_term in str(row["Character"])
+                or search_term == str(row["Reading"]).lower()
+            ):
                 result.append(row)
-                break
-
-    if nospace_only:  # 向引使用
-        mode = "tìm từng chữ"
-
-        for term in list(search_term):
-            for row in rows:
-                if (
-                    term in str(row["Character"])
-                    or search_term == str(row["Reading"]).lower()
-                ):
-                    result.append(row)
-                    break
 
     return (
         Titled(
@@ -165,7 +132,6 @@ def home(search: Optional[str] = None):
                     _="on click toggle .hide-cols on <table/>",
                     type="button",
                 ),
-                P(f"Cách tìm: {mode}."),
                 Table(_class="hide-cols")(
                     Thead(
                         Tr(
