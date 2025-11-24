@@ -54,6 +54,7 @@ how_to_search = (
     "hướng dẫn sử dụng: tìm chữ cho từng từ.",
     'hướng-dẫn sử-dụng: tìm cụm "hướng dẫn" và "sử dụng".',
     "向引使用: tìm từng chữ.",
+    "hướng-dẫn: tìm cụm từ.",
 )
 
 symbols = (
@@ -73,38 +74,54 @@ symbols = (
 
 
 @rt
-async def index(search: Optional[str] = None):
+def index(search: Optional[str] = None):
+    return home(search)
+
+
+@timed_cache()
+def home(search: Optional[str] = None):
     search_term = search.lower().strip() if search else ""
 
-    result = []
+    result: list[dict] = []
+    mode: str = ""
 
     space_dash = " " in search_term and "-" in search_term
     space_only = " " in search_term and "-" not in search_term
     nospace_dash = " " not in search_term and "-" in search_term
     nospace_only = " " not in search_term and "-" not in search_term
 
-    if space_dash:  # hướng dẫn sử dụng
+    if space_dash:  # hướng-dẫn sử-dụng; hướng-dẫn sử
+        mode = "tìm từng cụm được nối bằng kí tự gạch ngang (-)"
+
         for term in search_term.split(" "):
+            term = term.replace("-", " ")
+
             for row in rows:
-                if term.replace("-", " ") in str(row["Examples"]).lower():
+                if term == str(row["Reading"]).lower():
+                    result.append(row)
+                elif term in str(row["Examples"]):
                     result.append(row)
                     break
 
-    if space_only:  # hướng-dẫn sử-dụng
-        for term in search_term.split(" "):
-            result.extend(
-                row
-                for row in rows
-                if term == str(row["Reading"]).lower() and row not in result
-            )
+    if space_only:  # hướng dẫn sử dụng
+        mode = "tìm chữ cho từng từ"
 
-    if nospace_dash:
+        for term in search_term.split(" "):
+            for row in rows:
+                if term == str(row["Reading"]).lower():
+                    result.append(row)
+
+    if nospace_dash:  # hướng-dẫn
+        mode = "tìm cụm từ"
+
         for row in rows:
             if search_term.replace("-", " ") in str(row["Examples"]).lower():
                 result.append(row)
                 break
 
-    if nospace_only:
+    if nospace_only:  # 向引使用
+        mode = "tìm từng chữ"
+
         for term in list(search_term):
             for row in rows:
                 if (
@@ -148,7 +165,7 @@ async def index(search: Optional[str] = None):
                     _="on click toggle .hide-cols on <table/>",
                     type="button",
                 ),
-                P("Cách tìm: "),
+                P(f"Cách tìm: {mode}."),
                 Table(_class="hide-cols")(
                     Thead(
                         Tr(
