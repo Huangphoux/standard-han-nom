@@ -40,29 +40,33 @@ def index_hnc(search: Optional[str] = None, search_char: Optional[str] = None):
 
 
 @timed_cache()
-def render_hnc(search: Optional[str] = None, search_char: Optional[str] = None):
-    search_term = search.lower().strip() if search else ""
+def render_hnc(search, search_char):
+    if not search:  # để trống
+        return []
 
     result: list[dict] = []
 
-    if not search_term:
-        result = []
-    else:
-        if " " in search_term:  # hướng dẫn sử dụng
-            for term in search_term.split(" "):
-                for row in rows:
-                    if term == str(row["Reading"]).lower() and row not in result:
-                        result.append(row)
-        else:  # 向, người
-            if search_char:
-                for char in list(search_term):
-                    for row in rows:
-                        if char == str(row["Character"]):
-                            result.append(row)
-            else:
-                for row in rows:
-                    if search_term == str(row["Reading"]).lower():
-                        result.append(row)
+    search_term = search.lower().strip()
+
+    search_terms = (
+        search_term.replace("-", " ").split(" ")
+        if " " in search_term
+        else [search_term]
+    )
+
+    for term in search_terms:
+        for row in rows:
+            if search_char:  # tìm cụm từ hoặc nghĩa của từng chữ
+                if (
+                    term in str(row["Examples"]).lower()
+                    or term == str(row["Reading"]).lower()
+                ):
+                    result.append(row)
+                elif len(search_terms) == 1 and term in str(row["Character"]):
+                    result.append(row)
+            elif term == str(row["Reading"]).lower() and row not in result:
+                result.append(row)
+
     return (
         Title("Tìm chữ Hán Nôm"),
         Body(hx_boost="true")(
@@ -104,7 +108,7 @@ def render_hnc(search: Optional[str] = None, search_char: Optional[str] = None):
                                 checked=True if search_char else False,
                             ),
                             Label(
-                                "Tìm nghĩa của từng chữ Hán Nôm chuẩn",
+                                "Tìm nghĩa hoặc tìm cụm từ",
                                 _for="search_char",
                             ),
                         ),
