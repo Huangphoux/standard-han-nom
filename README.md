@@ -1,5 +1,10 @@
 # Create Anki decks for learning the standard chữ Hán Nôm
 
+# TODO
+- Tra cứu từ láy
+- Tra cứu chữ phiên âm
+- Tra cứu tên các quốc gia và vùng lãnh thổ trên thế giới
+
 # 2025/11/21
 
 -   Hey chat, I'm making a website to look up Han Nom characters. Why tf did the original site not have that in the first place?
