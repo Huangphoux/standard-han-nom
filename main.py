@@ -12,7 +12,7 @@ app, rt = fast_app(
     hdrs=(
         Link(rel="icon", href="https://fav.farm/❤️"),  # favicon
         # Vendored
-        Link(rel="stylesheet", href="simple.css"),
+        Link(rel="stylesheet", href="simple_2.3.7.css"),
         Link(rel="stylesheet", href="style.css"),
         Script(src="htmx.min_2.0.8.js"),
     ),

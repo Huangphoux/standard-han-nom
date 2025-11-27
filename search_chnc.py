@@ -1,11 +1,15 @@
 from fasthtml.common import *
 import csv
 from shared import navbar, footer
+from loguru import logger
+
+
+logger.remove()
+logger.add("logs/search_chnc_debug.log")
 
 chnc = APIRouter()
 
-
-with open("after-processing-list.csv", encoding="utf-8") as f:
+with open("csv/after-processing-list.csv", encoding="utf-8") as f:
     global reader, headers, rows
     reader = csv.DictReader(f)
     headers = reader.fieldnames or []
@@ -35,12 +39,12 @@ symbols = (
 
 
 @chnc.get("/hnc")
-def index_hnc(search: Optional[str] = None, search_char: Optional[str] = None):
-    return render_hnc(search, search_char)
+def index_hnc(search: Optional[str] = None):
+    return render_hnc(search)
 
 
 @timed_cache()
-def render_hnc(search, search_char):
+def get_result(search):
     if not search:  # để trống
         return []
 
@@ -48,24 +52,19 @@ def render_hnc(search, search_char):
 
     search_term = search.lower().strip()
 
-    search_terms = (
-        search_term.replace("-", " ").split(" ")
-        if " " in search_term
-        else [search_term]
-    )
-
-    for term in search_terms:
+    for term in search_term.split(" "):
         for row in rows:
-            if search_char:  # tìm cụm từ hoặc nghĩa của từng chữ
-                if (
-                    term in str(row["Examples"]).lower()
-                    or term == str(row["Reading"]).lower()
-                ):
-                    result.append(row)
-                elif len(search_terms) == 1 and term in str(row["Character"]):
-                    result.append(row)
-            elif term == str(row["Reading"]).lower() and row not in result:
+            if term == str(row["Reading"]).lower():
                 result.append(row)
+
+    logger.debug(result)
+
+    return result
+
+
+@timed_cache()
+def render_hnc(search):
+    result = get_result(search)
 
     return (
         Title("Tìm chữ Hán Nôm"),
@@ -99,54 +98,37 @@ def render_hnc(search, search_char):
                                 onfocus="let temp=this.value; this.value=''; this.value=temp",
                             ),
                         ),
-                        P(
-                            Input(
-                                type="checkbox",
-                                id="search_char",
-                                name="search_char",
-                                value="true",
-                                checked=True if search_char else False,
-                            ),
-                            Label(
-                                "Tìm nghĩa hoặc tìm cụm từ",
-                                _for="search_char",
-                            ),
-                        ),
                         Input(type="submit", value="Tìm kiếm"),
                         Span(_class="htmx-indicator", id="loading")(
                             "(Đang tìm kiếm …)"
                         ),
                     ),
                 ),
-                Button(
-                    "Hiện Ghi chú, Mã Unicode, và Lớp (cần JavaScript)",
-                    onclick="document.querySelector('table').classList.toggle('hide-cols')",
-                    type="button",
-                )
-                if search
-                else None,  # hide button if no result
-                Table(_class="hide-cols", autofocus=True)(
-                    Thead(
-                        Tr(
-                            Th("Chữ"),
-                            Th("Cách đọc"),
-                            Th("Ví dụ"),
-                            Th("Ghi chú"),
-                            Th("Mã Unicode"),
-                            Th("Lớp"),
-                        )
-                    ),
-                    Tbody()(
-                        *[
+                Figure(
+                    Table(
+                        Thead(
                             Tr(
-                                *[Td(entry[header]) for header in headers],
+                                Th("Chữ"),
+                                Th("Cách đọc"),
+                                Th("Ví dụ"),
+                                Th("Ghi chú"),
+                                Th("Mã Unicode"),
+                                Th("Chữ giản thể"),
+                                Th("Lớp"),
                             )
-                            for entry in result
-                        ]
-                    ),
-                )
-                if result
-                else None,  # hide table if no result
+                        ),
+                        Tbody()(
+                            *[
+                                Tr(
+                                    *[Td(entry[header]) for header in headers],
+                                )
+                                for entry in result
+                            ]
+                        ),
+                    )
+                    if result
+                    else None
+                ),  # hide table if no result
                 Details(
                     Summary("Hướng dẫn sử dụng"),
                     H2("Cách sử dụng thanh tìm kiếm"),
