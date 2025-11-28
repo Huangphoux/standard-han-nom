@@ -50,12 +50,8 @@ def get_result(search):
 
     result: list[dict] = []
 
-    search_term = search.lower().strip()
-
-    for term in search_term.split(" "):
-        for row in rows:
-            if term == str(row["Reading"]).lower():
-                result.append(row)
+    for term in search.lower().strip().split(" "):
+        result.extend(row for row in rows if term == row["Reading"].lower())
 
     logger.debug(result)
 

@@ -1,5 +1,10 @@
 # Create Anki decks for learning the standard chữ Hán Nôm
 
+# List
+- vPhon
+- Underthesea NLP
+
+
 # TODO
 - Tra cứu từ láy
 - Tra cứu chữ phiên âm
