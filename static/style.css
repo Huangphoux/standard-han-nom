@@ -27,3 +27,14 @@ td {
 tr td:first-child {
     font-size: 10rem;
 }
+
+form {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    backdrop-filter: blur(10px);
+}
+
+.htmx-request.htmx-indicator {
+    transition-delay: 1s !important;
+}
