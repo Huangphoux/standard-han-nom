@@ -4,14 +4,20 @@
 
 @font-face {
     font-family: minh;
-    src: url(_minh.woff2) format("woff2");
+    font-style: normal;
+    font-weight: 400;
     font-display: swap;
+    src: local("Minh Nguyen"), local("Minh Nguyen Regular"),
+        url(_minh.woff2) format("woff2");
 }
 
 @font-face {
     font-family: gothic;
-    src: url(_gothic.woff2) format("woff2");
     font-display: swap;
+    font-weight: 400;
+    font-style: normal;
+    src: local("Gothic Nguyen"), local("Gothic Nguyen Regular"),
+        url(_gothic.woff2) format("woff2");
 }
 
 * {
@@ -19,22 +25,45 @@
     font-weight: normal;
 }
 
-td {
-    font-size: 2rem;
-    white-space: pre-wrap;
+th {
+    text-align: center;
 }
 
 tr td:first-child {
-    font-size: 10rem;
+    /* character font size */
+    font-size: 15rem;
+    text-align: center !important;
+    font-family: minh;
+}
+
+tr td:last-child {
+    /* example font size */
+    font-size: 3rem;
+    text-align: start !important;
+    white-space: pre-wrap;
+    font-family: gothic;
 }
 
 form {
-    position: -webkit-sticky;
     position: sticky;
-    top: 0;
-    backdrop-filter: blur(10px);
+    top: 1rem;
+    background: Canvas;
+}
+
+table {
+    width: 100%;
 }
 
 .htmx-request.htmx-indicator {
     transition-delay: 1s !important;
+}
+
+#loading {
+    width: 1.5rem;
+    filter: invert(1);
+}
+@media (prefers-color-scheme: light) {
+    #loading {
+        filter: invert(0);
+    }
 }
