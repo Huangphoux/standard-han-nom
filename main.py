@@ -8,7 +8,7 @@ app, rt = fast_app(
     middleware=(Middleware(BrotliMiddleware, quality=7),),
     default_hdrs=False,
     hdrs=(
-        # Link(rel="icon", href="https://fav.farm/❤️"),  # favicon
+        Link(rel="icon", href="https://fav.farm/❤️"),  # favicon
         Link(rel="stylesheet", href="style.css"),
         # Vendored
         Link(rel="stylesheet", href="simple@2.3.7.css"),
@@ -16,7 +16,9 @@ app, rt = fast_app(
     ),
     htmlkw={"lang": "vi"},
     static_path="static",
+    title="Tìm chữ Hán Nôm",
 )
+
 
 serve()
 
@@ -32,7 +34,12 @@ with open("csv/after-processing-list.csv", encoding="utf-8") as f:
 
 
 @rt("/")
-def index(search: Optional[str] = None):
+async def index(search: Optional[str] = None):
+    return await render(search)
+
+
+@timed_cache()
+async def render(search):
     if not search:  # để trống
         result = []
     else:
@@ -44,19 +51,20 @@ def index(search: Optional[str] = None):
         logger.debug(result)
 
     return (
-        Title("Tìm kiếm chữ Hán Nôm"),
+        Title(f"{search}: Tìm chữ Hán Nôm"),
         Body(hx_boost="true", hx_swap="show:none")(
             Header(
-                Nav(A("Trang chủ", href="/")),
+                Nav(
+                    A("Trang chủ", href="/"),
+                    A("GitHub", href="https://github.com/Huangphoux/standard-han-nom/"),
+                ),
                 H1("Tìm chữ Hán Nôm"),
                 P("Tìm bằng chữ Quốc Ngữ, tra ra chữ Hán Nôm"),
             ),
             Main(
                 Form(role="search", action=index, method="get")(
                     Fieldset(
-                        Label(
-                            "Tìm chữ Hán Nôm",
-                        ),
+                        Label("Tìm chữ Hán Nôm"),
                         Input(
                             value=search.strip() if search else "",
                             type="search",
@@ -81,17 +89,8 @@ def index(search: Optional[str] = None):
                     ),
                 ),
                 Table(
-                    Thead(
-                        Tr(
-                            Th(
-                                "Chữ",
-                            ),
-                            Th(
-                                "Ví dụ",
-                            ),
-                        )
-                    ),
-                    Tbody()(
+                    Thead(Tr(Th("Chữ"), Th("Ví dụ"))),
+                    Tbody(
                         *[
                             Tr(
                                 *[
@@ -105,6 +104,9 @@ def index(search: Optional[str] = None):
                 )
                 if result
                 else None,
+                P(_class="notice")(
+                    "Trang web vẫn có thể được sử dụng mà không cần JavaScript."
+                ),
             ),
             Footer(
                 P(
@@ -133,12 +135,10 @@ def index(search: Optional[str] = None):
                     ".",
                 ),
                 P(
-                    "Mã nguồn (135 dòng) của trang này nằm ở ",
-                    (
-                        A(
-                            "đây",
-                            href="https://github.com/Huangphoux/standard-han-nom/blob/main/main.py",
-                        )
+                    "Mã nguồn (~140 dòng) của trang này nằm ở ",
+                    A(
+                        "đây",
+                        href="https://github.com/Huangphoux/standard-han-nom/blob/main/main.py",
                     ),
                     " nè nha. ❤️",
                 ),
